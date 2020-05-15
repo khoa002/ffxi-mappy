@@ -1,62 +1,100 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
+using System.Diagnostics;
 using System.Windows.Forms;
 
-namespace mappy {
-   public partial class fEditHunts : Form {
-      private fMap m_parent;
-      private fEditHunts(fMap parent) {
-         m_parent = parent;
-         InitializeComponent();
-         PopulateList();
+namespace mappy
+{
+    public partial class fEditHunts : Form
+    {
+        private fMap m_parent;
+        private Config m_config;
 
-         lvHunts.ItemActivate += new EventHandler(lvHunts_ItemActivate);
-         m_parent.Engine.Data.Hunts.DataChanged += new MapEngine.GenericEvent(Hunts_DataChanged);
-      }
+        private fEditHunts(fMap parent, Config config)
+        {
+            m_parent = parent;
+            m_config = config;
+            InitializeComponent();
+            PopulateList();
 
-      public static void BeginEdit(fMap Owner) {
-         fEditHunts editor = new fEditHunts(Owner);
-         editor.Show(Owner);
-      }
+            lvHunts.ItemActivate += new EventHandler(lvHunts_ItemActivate);
+            m_parent.Engine.Data.Hunts.DataChanged += new MapEngine.GenericEvent(Hunts_DataChanged);
+        }
 
-      private void PopulateList() {
-         lvHunts.Items.Clear();
-         foreach (KeyValuePair<string, MapEngine.MapHunt> pair in m_parent.Engine.Data.Hunts) {
-            ListViewItem item = new ListViewItem(pair.Value.Hunt.ToString());
-            item.SubItems.Add(pair.Value.Permanent.ToString());
-            item.Tag = pair.Value;
+        public static void BeginEdit(fMap Owner, Config config)
+        {
+            fEditHunts editor = new fEditHunts(Owner, config);
 
-            lvHunts.Items.Add(item);
-         }
-      }
+            editor.Show(Owner);
+            editor.ApplyConfig();
+        }
 
-      private void lvHunts_ItemActivate(object sender, EventArgs e) {
-         if (lvHunts.SelectedItems.Count > 0) {
-            ListViewItem item = lvHunts.SelectedItems[0];
+        protected override void OnClosed(EventArgs e)
+        {
+            m_config["EditHuntsWindowTop"] = this.Top;
+            m_config["EditHuntsWindowLeft"] = this.Left;
+            m_config["EditHuntsWindowWidth"] = this.Width;
+            m_config["EditHuntsWindowHeight"] = this.Height;
+            m_config.Save();
+            base.OnClosed(e);
+        }
 
-            MapEngine.MapHunt hunt = (MapEngine.MapHunt)item.Tag;
-            txtHuntEntry.Text = hunt.Hunt.ToString();
-            chkPermanent.Checked = hunt.Permanent;
+        private void ApplyConfig()
+        {
+            try
+            {
+                this.Top = m_config.Get("EditHuntsWindowTop", Bounds.Top);
+                this.Left = m_config.Get("EditHuntsWindowLeft", Bounds.Left);
+                this.Width = m_config.Get("EditHuntsWindowWidth", Bounds.Width);
+                this.Height = m_config.Get("EditHuntsWindowHeight", Bounds.Height);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("WARNING: an error occured processing a config value: " + ex.Message);
+            }
+        }
 
-            m_parent.Engine.Data.Hunts.Remove(hunt);
-            lvHunts.Items.Remove(item);
-         }
-      }
+        private void PopulateList()
+        {
+            lvHunts.Items.Clear();
+            foreach (KeyValuePair<string, MapEngine.MapHunt> pair in m_parent.Engine.Data.Hunts)
+            {
+                ListViewItem item = new ListViewItem(pair.Value.Hunt.ToString());
+                item.SubItems.Add(pair.Value.Permanent.ToString());
+                item.Tag = pair.Value;
 
-      private void cmdAddHunt_Click(object sender, EventArgs e) {
-         MapEngine.MapHunt hunt = m_parent.Engine.Data.Hunts.Add(txtHuntEntry.Text, chkPermanent.Checked);
-         if (hunt != null) {
-            txtHuntEntry.Text = "";
-            chkPermanent.Checked = false;
-         }
-      }
+                lvHunts.Items.Add(item);
+            }
+        }
 
-      private void Hunts_DataChanged() {
-         PopulateList();
-      }
-   }
+        private void lvHunts_ItemActivate(object sender, EventArgs e)
+        {
+            if (lvHunts.SelectedItems.Count > 0)
+            {
+                ListViewItem item = lvHunts.SelectedItems[0];
+
+                MapEngine.MapHunt hunt = (MapEngine.MapHunt)item.Tag;
+                txtHuntEntry.Text = hunt.Hunt.ToString();
+                chkPermanent.Checked = hunt.Permanent;
+
+                m_parent.Engine.Data.Hunts.Remove(hunt);
+                lvHunts.Items.Remove(item);
+            }
+        }
+
+        private void cmdAddHunt_Click(object sender, EventArgs e)
+        {
+            MapEngine.MapHunt hunt = m_parent.Engine.Data.Hunts.Add(txtHuntEntry.Text, chkPermanent.Checked);
+            if (hunt != null)
+            {
+                txtHuntEntry.Text = "";
+                chkPermanent.Checked = false;
+            }
+        }
+
+        private void Hunts_DataChanged()
+        {
+            PopulateList();
+        }
+    }
 }
