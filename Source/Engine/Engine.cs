@@ -29,6 +29,7 @@ namespace MapEngine
     {
         //private storage
         private Rectangle clientRect = new Rectangle(0, 0, 100, 100);
+
         private PointF clientCenter = new PointF(300, 300);
         private PointF mapCenter = new PointF(0, 0);
         private PointF mapViewOffset = new PointF(0, 0);
@@ -36,6 +37,7 @@ namespace MapEngine
 
         //propery storage
         private MapData m_data = null;
+
         private GameData m_game = null;
         private float m_zoom = 1.0f;
         private float m_ratio = 1.0f;
@@ -109,6 +111,7 @@ namespace MapEngine
 
         //cached pens of various user settings
         private Pen pRangeFinder = new Pen(Color.White);
+
         private Pen pAlertRing = new Pen(Color.Red);
         private Pen pHuntChain = new Pen(Color.Green);
         private Pen pHuntLockedChain = new Pen(Color.DarkGreen);
@@ -120,11 +123,13 @@ namespace MapEngine
 
         //cached pens used only internally
         private Pen pCachePlayer = new Pen(Color.Black);
+
         private Pen pCacheMapLine;
         private Pen pCacheSpawnBorder = new Pen(Color.White);
 
         //cached brushes
         private Brush bPlayer = new SolidBrush(Color.Purple);
+
         private Brush bNPC = new SolidBrush(Color.Green);
         private Brush bMOB = new SolidBrush(Color.Red);
         private Brush bHidden = new SolidBrush(Color.Gray);
@@ -156,6 +161,7 @@ namespace MapEngine
         {
             CommonInitialization();
         }
+
         /// <summary>Creates a new engine adds it to another container.</summary>
         public Engine(IContainer container)
         {
@@ -405,7 +411,6 @@ namespace MapEngine
                     Updated();
             }
         }
-
 
         [Category("Grid")]
         [Description("Gets or sets the font used to render the grid tick marks.")]
@@ -1356,9 +1361,9 @@ namespace MapEngine
                     DrawLinesFiltered(surface);
                 else
                     DrawLines(surface);
-                    DrawLabels(surface);
-                    DrawSpawns(surface);
-                    DrawLoc(surface); /// IHM EDIT
+                DrawLabels(surface);
+                DrawSpawns(surface);
+                DrawLoc(surface); /// IHM EDIT
             }
             catch (Exception ex)
             {
@@ -1434,11 +1439,13 @@ namespace MapEngine
         {
             return FindSpawn(client.X, client.Y);
         }
+
         /// <summary>Find a spawn from CLIENT coordinates with a default search radius</summary>
         public GameSpawn FindSpawn(float clientX, float clientY)
         {
             return FindSpawn(clientX, clientY, (m_playerSize / m_ratio) * 3);
         }
+
         /// <summary>Find a spawn from CLIENT coordinates within the specified search radius</summary>
         public GameSpawn FindSpawn(float clientX, float clientY, float threshold)
         {
@@ -1453,16 +1460,19 @@ namespace MapEngine
         {
             return mapViewOffset.X + clientCenter.X + ((X - mapCenter.X) * m_ratio);
         }
+
         /// <summary>Translates a MAP Y coordinate to a CLIENT Y coordinate.</summary>
         public float CalcClientCoordY(float Y)
         {
             return mapViewOffset.Y + clientCenter.Y - ((Y - mapCenter.Y) * m_ratio);
         }
+
         /// <summary>Translates a CLIENT X coordinate to a MAP X coordinate.</summary>
         public float ClientToMapCoordX(float X)
         {
             return mapCenter.X - ((mapViewOffset.X + clientCenter.X - X) / m_ratio);
         }
+
         /// <summary>Translates a CLIENT Y coordinate to a MAP Y coordinate.</summary>
         public float ClientToMapCoordY(float Y)
         {
@@ -1539,13 +1549,13 @@ namespace MapEngine
                 float playerZ = m_game.Player.Location.Z;
 
                 if (m_depthFilterSpawn)
-                    {
-                        //calculate simple z offset and filter based on user cutoff settings.
-                        // note: depth filter NEVER filters out the player, target, or current selection.
-                        if (Math.Max(playerZ, label.Location.Z) - Math.Min(playerZ, label.Location.Z) > m_depthCutoff)
-                            continue;
-                    }
-                    
+                {
+                    //calculate simple z offset and filter based on user cutoff settings.
+                    // note: depth filter NEVER filters out the player, target, or current selection.
+                    if (Math.Max(playerZ, label.Location.Z) - Math.Min(playerZ, label.Location.Z) > m_depthCutoff)
+                        continue;
+                }
+
                 g.DrawString(label.Caption, m_labelFont, b, x, y);
             }
         }
@@ -1666,9 +1676,14 @@ namespace MapEngine
                 else
                     tlxc = (char)(tlx + 64);
 
-                g.DrawString(String.Format("({0}-{1})", tlxc, tly), m_labelFont, bYOUFill, 10, 10);
+                var textPosition = new Point(0, 0);
+                var rect = new RectangleF(textPosition.X, textPosition.Y, 50, 20);
+                StringFormat sf = new StringFormat();
+                sf.LineAlignment = StringAlignment.Center;
+                sf.Alignment = StringAlignment.Center;
+                g.FillRectangle(Brushes.White, rect);
+                g.DrawString(String.Format("({0}-{1})", tlxc, tly), m_labelFont, bYOUFill, rect, sf);
             }
-
         }
 
         //renders all valid spawn data to the buffer
@@ -1711,12 +1726,15 @@ namespace MapEngine
                             case SpawnType.Player:
                                 size = m_playerSize;
                                 break;
+
                             case SpawnType.NPC:
                                 size = m_NPCSize;
                                 break;
+
                             case SpawnType.MOB:
                                 size = m_MOBSize;
                                 break;
+
                             default:
                                 size = 4.0f;
                                 break;
@@ -1741,24 +1759,27 @@ namespace MapEngine
                             float rads = (float)Math.Atan2(headY - tailY, headX - tailX); //calculate the line angle
                             float size = 0;
                             switch (spawn.Type)
-                        {
-                            case SpawnType.Player:
-                                size = m_playerSize;
-                                break;
-                            case SpawnType.NPC:
-                                size = m_NPCSize;
-                                break;
-                            case SpawnType.MOB:
-                                size = m_MOBSize;
-                                break;
-                            default:
-                                size = 4.0f;
-                                break;
-                        }
+                            {
+                                case SpawnType.Player:
+                                    size = m_playerSize;
+                                    break;
+
+                                case SpawnType.NPC:
+                                    size = m_NPCSize;
+                                    break;
+
+                                case SpawnType.MOB:
+                                    size = m_MOBSize;
+                                    break;
+
+                                default:
+                                    size = 4.0f;
+                                    break;
+                            }
 
                             float offX = (size * (float)Math.Cos(rads));           //move the line and arrow out a bit so its not in the dead center
                             float offY = (size * (float)Math.Sin(rads));
-                            
+
                             //draw ze lines
                             g.DrawLine(pPetChain, headX - offX, headY - offY, tailX, tailY);
                             DrawArrowHead(g, pPetChain, headX - offX, headY - offY, rads, 10f, 5f);
@@ -1791,11 +1812,10 @@ namespace MapEngine
 
             if (m_game.Player != null)                                       //YOU the player is placed above all other normal spawns
                 DrawPlayer(g, m_game.Player);
-            
+
             //draw each spawn
             foreach (KeyValuePair<uint, GameSpawn> pair in m_game.Spawns)
             {
-                
                 GameSpawn spawn = pair.Value;
                 //do not draw the target/player/selected spawns. these will be drawn later to give them higher viewing priority
                 if (spawn != m_game.Player && (spawn != m_game.Selected || spawn != m_game.Target))
@@ -1810,9 +1830,8 @@ namespace MapEngine
                     }
                     DrawSpawn(g, spawn);
                 }
-                
             }
-            
+
             //draw target and selection lines
             if (m_game.Player != null && m_game.Target != null)
             {
@@ -1840,7 +1859,6 @@ namespace MapEngine
                 DrawSpawn(g, m_game.Selected);
             if (m_game.Target != null && m_game.Target != m_game.Player)     //current in-game target has highest precidence of anything
                 DrawSpawn(g, m_game.Target);
-
         }
 
         //renders the special player graphic to the buffer
@@ -1869,7 +1887,6 @@ namespace MapEngine
 
             //draw the arrow head
             DrawArrowHead(g, pYOU, ox + x, oy + y, spawn.Heading, 10f, arrowHeadSize);
-            
         }
 
         private void DrawArrowHead(Graphics g, Pen pen, float x, float y, float Heading, float Angle, float Size)
@@ -1913,12 +1930,15 @@ namespace MapEngine
                         case SpawnType.Player:
                             size = m_playerSize;
                             break;
+
                         case SpawnType.NPC:
                             size = m_NPCSize;
                             break;
+
                         case SpawnType.MOB:
                             size = m_MOBSize;
                             break;
+
                         default:
                             size = 4.0f;
                             break;
@@ -1968,6 +1988,7 @@ namespace MapEngine
 
                             g.DrawRectangle(pCacheSpawnBorder, x - radius, y - radius, size, size);
                             break;
+
                         case SpawnType.NPC:
                             g.FillEllipse(bNPC, x - radius, y - radius, size, size);
                             if (STH)
@@ -1975,6 +1996,7 @@ namespace MapEngine
                             if (m_drawAlertRanges && spawn.Alert)
                                 g.DrawEllipse(pAlertRing, x - (size + m_alertSize) / 2, y - (size + m_alertSize) / 2, (size + m_alertSize), (size + m_alertSize));
                             break;
+
                         case SpawnType.MOB:
                             g.FillEllipse(bMOB, x - radius, y - radius, size, size);
                             if (STH)
@@ -2014,14 +2036,17 @@ namespace MapEngine
                             fInfoText = m_playerTextFont;
                             bInfoText = bTextPlayer;
                             break;
+
                         case SpawnType.NPC:
                             fInfoText = m_NPCTextFont;
                             bInfoText = bTextNPC;
                             break;
+
                         case SpawnType.MOB:
                             fInfoText = m_MOBTextFont;
                             bInfoText = bTextMOB;
                             break;
+
                         default:
                             fInfoText = SystemFonts.DefaultFont;
                             bInfoText = bSelected;
@@ -2038,10 +2063,10 @@ namespace MapEngine
                         output = rxInfoName.Replace(output, spawn.RepName);
                     else
                         output = rxInfoName.Replace(output, spawn.Name);
-                        output = rxInfoHpp.Replace(output, spawn.HealthPercent.ToString());
-                        output = rxInfoDistance.Replace(output, spawn.Distance.ToString("0.##"));
-                        output = rxNewLine.Replace(output, "\n");
-                        output = rxInfoID.Replace(output, spawn.ID.ToString("X")); /// IHM EDIT
+                    output = rxInfoHpp.Replace(output, spawn.HealthPercent.ToString());
+                    output = rxInfoDistance.Replace(output, spawn.Distance.ToString("0.##"));
+                    output = rxNewLine.Replace(output, "\n");
+                    output = rxInfoID.Replace(output, spawn.ID.ToString("X")); /// IHM EDIT
 
                     //if debugging and a debug string is set on the spawn, then append it to the info text regardless of the template
 #if DEBUG
@@ -2121,6 +2146,7 @@ namespace MapEngine
         {
             UpdateMap();
         }
+
         private void m_game_Updated()
         {
             UpdateMap();
